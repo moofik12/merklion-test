@@ -13091,6 +13091,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__store_index__ = __webpack_require__(24);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pages_ChatRoom__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pages_ChatRoom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6__pages_ChatRoom__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_axios__ = __webpack_require__(25);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_axios___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_axios__);
+
 
 
 
@@ -35923,12 +35926,52 @@ __WEBPACK_IMPORTED_MODULE_0_vue___default.a.use(__WEBPACK_IMPORTED_MODULE_1_vuex
 
 /* harmony default export */ __webpack_exports__["a"] = (new __WEBPACK_IMPORTED_MODULE_1_vuex__["a" /* default */].Store({
     state: {
-        messages: [{ username: "Mary", message: "Hello, Pete!" }, { username: "Pete", message: "Yo, Mary!" }],
-        users: [{ name: "Mary", avatar: "" }, { name: "Pete", avatar: "" }]
+        messages: [],
+        users: []
     },
-    mutations: {},
+    mutations: {
+        saveManyMessages: function saveManyMessages(state, data) {
+            state.messages = data;
+        },
+        saveOneMessage: function saveOneMessage(state, message) {
+            state.messages.push(message);
+        }
+    },
     actions: {
-        sendMessage: function sendMessage(message) {}
+        getMessages: function getMessages(_ref) {
+            var commit = _ref.commit;
+
+            __WEBPACK_IMPORTED_MODULE_2_axios___default.a.get('/messages').then(function (response) {
+                commit('saveManyMessages', response.data);
+            });
+        },
+        listenBroadcastChannel: function listenBroadcastChannel(_ref2) {
+            var commit = _ref2.commit;
+
+            Echo.private('chat').listen('MessageSent', function (e) {
+                var message = {
+                    message: e.message.message,
+                    user: e.user
+                };
+
+                commit('saveOneMessage', message);
+            });
+        },
+        sendMessage: function sendMessage(_ref3, message) {
+            var commit = _ref3.commit;
+
+            commit('saveOneMessage', message);
+
+            var socketId = Echo.socketId();
+
+            __WEBPACK_IMPORTED_MODULE_2_axios___default.a.post('/messages', message, {
+                headers: {
+                    "X-Socket-ID": socketId
+                }
+            }).then(function (response) {
+                console.log(response.data);
+            });
+        }
     }
 }));
 
@@ -36879,6 +36922,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_ChatInput___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__components_ChatInput__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_UsersList__ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_UsersList___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__components_UsersList__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_vuex__ = __webpack_require__(1);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 //
 //
 //
@@ -36904,19 +36950,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+
 
 
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    data: function data() {
-        return {};
-    },
+    props: ['user'],
+    methods: _extends({}, Object(__WEBPACK_IMPORTED_MODULE_3_vuex__["b" /* mapActions */])(['getMessages', 'listenBroadcastChannel'])),
     components: {
         'message-window': __WEBPACK_IMPORTED_MODULE_0__components_MessageWindow___default.a,
         'users-list': __WEBPACK_IMPORTED_MODULE_2__components_UsersList___default.a,
         'chat-input': __WEBPACK_IMPORTED_MODULE_1__components_ChatInput___default.a
+    },
+    created: function created() {
+        this.getMessages();
+        this.listenBroadcastChannel();
     }
 });
 
@@ -37012,7 +37062,7 @@ var render = function() {
       _vm._l(_vm.messages, function(message) {
         return _c("div", [
           _c("p", [
-            _c("b", [_vm._v(_vm._s(message.username) + ": ")]),
+            _c("b", [_vm._v(_vm._s(message.user.name) + ": ")]),
             _vm._v(_vm._s(message.message))
           ])
         ])
@@ -37049,7 +37099,7 @@ var __vue_template_functional__ = false
 /* styles */
 var __vue_styles__ = injectStyle
 /* scopeId */
-var __vue_scopeId__ = "data-v-f89e4712"
+var __vue_scopeId__ = null
 /* moduleIdentifier (server only) */
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
@@ -37092,13 +37142,13 @@ var content = __webpack_require__(51);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(52)("25eb716f", content, false, {});
+var update = __webpack_require__(52)("1d7590b4", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
  if(!content.locals) {
-   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-f89e4712\",\"scoped\":true,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./ChatInput.vue", function() {
-     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-f89e4712\",\"scoped\":true,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./ChatInput.vue");
+   module.hot.accept("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-f89e4712\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./ChatInput.vue", function() {
+     var newContent = require("!!../../../node_modules/css-loader/index.js!../../../node_modules/vue-loader/lib/style-compiler/index.js?{\"vue\":true,\"id\":\"data-v-f89e4712\",\"scoped\":false,\"hasInlineConfig\":true}!../../../node_modules/vue-loader/lib/selector.js?type=styles&index=0!./ChatInput.vue");
      if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
      update(newContent);
    });
@@ -37116,7 +37166,7 @@ exports = module.exports = __webpack_require__(7)(false);
 
 
 // module
-exports.push([module.i, "\n.margin-bottom[data-v-f89e4712] {\n    margin-bottom: 0.25em;\n}\n", ""]);
+exports.push([module.i, "\n.margin-bottom {\n    margin-bottom: 0.25em;\n}\n", ""]);
 
 // exports
 
@@ -37410,6 +37460,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['user'],
     data: function data() {
         return {
             message: 'Hello, everyone.'
@@ -37417,7 +37468,10 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
     },
     methods: _extends({}, Object(__WEBPACK_IMPORTED_MODULE_0_vuex__["b" /* mapActions */])(['sendMessage']), {
         send: function send() {
-            this.sendMessage(this.message);
+            this.sendMessage({
+                user: this.user,
+                message: this.message
+            });
 
             this.message = '';
         }
@@ -37443,7 +37497,14 @@ var render = function() {
             { attrs: { type: "is-warning" } },
             [
               _c("b-input", {
-                attrs: { value: _vm.message, type: "text", maxlength: "30" }
+                attrs: { type: "text", maxlength: "30" },
+                model: {
+                  value: _vm.message,
+                  callback: function($$v) {
+                    _vm.message = $$v
+                  },
+                  expression: "message"
+                }
               })
             ],
             1
@@ -37599,7 +37660,12 @@ var render = function() {
       ])
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "hero-foot" }, [_c("chat-input")], 1)
+    _c(
+      "div",
+      { staticClass: "hero-foot" },
+      [_c("chat-input", { attrs: { user: _vm.user } })],
+      1
+    )
   ])
 }
 var staticRenderFns = [

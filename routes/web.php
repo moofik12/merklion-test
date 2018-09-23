@@ -11,8 +11,10 @@
 |
 */
 
-Route::get('/chat', 'ChatController@chatIndex');
-
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/', 'ChatController@chatIndex');
+    Route::get('messages', 'ChatController@getMessages');
+    Route::post('messages', 'ChatController@sendMessage');
+});

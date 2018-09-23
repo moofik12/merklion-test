@@ -29,12 +29,12 @@ class User extends Authenticatable
     ];
 
     /**
-     * A message belong to a user
+     * A user can have many messages
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function user()
+    public function messages()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(Message::class);
     }
 }

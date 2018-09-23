@@ -18,7 +18,7 @@
         </div>
 
         <div class="hero-foot">
-            <chat-input></chat-input>
+            <chat-input :user="user"></chat-input>
         </div>
     </section>
 </template>
@@ -27,17 +27,24 @@
     import MessageWindow from '../components/MessageWindow';
     import ChatInput from '../components/ChatInput';
     import UsersList from '../components/UsersList';
+    import {mapActions} from 'vuex';
 
     export default {
-        data: function () {
-            return {
-
-            };
+        props: ['user'],
+        methods: {
+            ...mapActions([
+                'getMessages',
+                'listenBroadcastChannel'
+            ])
         },
         components: {
             'message-window': MessageWindow,
             'users-list': UsersList,
             'chat-input': ChatInput
+        },
+        created: function () {
+            this.getMessages();
+            this.listenBroadcastChannel();
         }
     }
 </script>

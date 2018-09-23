@@ -6,13 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Message extends Model
 {
+    protected $fillable = ["message"];
+
     /**
-     * A user can have many messages
+     * A message belong to a user
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function messages()
+    public function user()
     {
-        return $this->hasMany(Message::class);
+        return $this->belongsTo(User::class);
     }
 }

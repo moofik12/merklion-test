@@ -5,6 +5,7 @@ import Buefy from 'buefy';
 import 'buefy/dist/buefy.css'
 import store from './store/index';
 import ChatRoom from './pages/ChatRoom';
+import axios from 'axios';
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
@@ -12,6 +13,7 @@ window.Echo = new Echo({
     cluster: 'ap2',
     encrypted: true
 });
+
 
 Vue.use(Buefy);
 

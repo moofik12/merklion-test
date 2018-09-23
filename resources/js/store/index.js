@@ -6,21 +6,46 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-        messages: [
-            {username: "Mary", message: "Hello, Pete!"},
-            {username: "Pete", message: "Yo, Mary!"},
-        ],
-        users: [
-            {name: "Mary", avatar: ""},
-            {name: "Pete", avatar: ""}
-        ]
+        messages: [],
+        users: []
     },
     mutations: {
-
+        saveManyMessages(state, data) {
+            state.messages = data;
+        },
+        saveOneMessage(state, message) {
+            state.messages.push(message);
+        }
     },
     actions: {
-        sendMessage(message) {
+        getMessages({commit}) {
+            axios.get('/messages').then(response => {
+                commit('saveManyMessages', response.data);
+            });
+        },
+        listenBroadcastChannel({commit}) {
+            Echo.private('chat')
+                .listen('MessageSent', (e) => {
+                    let message = {
+                        message: e.message.message,
+                        user: e.user
+                    };
 
+                    commit('saveOneMessage', message);
+                });
+        },
+        sendMessage({commit}, message) {
+            commit('saveOneMessage', message);
+
+            let socketId = Echo.socketId();
+
+            axios.post('/messages', message, {
+                headers: {
+                    "X-Socket-ID": socketId
+                }
+            }).then(response => {
+                console.log(response.data);
+            });
         }
     }
 });

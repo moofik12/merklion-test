@@ -3,7 +3,7 @@
         <div class="columns margin-bottom">
             <div class="column is-10">
                 <b-field type="is-warning">
-                    <b-input :value="message" type="text" maxlength="30"></b-input>
+                    <b-input v-model="message" type="text" maxlength="30"></b-input>
                 </b-field>
             </div>
             <div class="column is-2">
@@ -17,6 +17,7 @@
     import {mapActions} from 'vuex';
 
     export default {
+        props: ['user'],
         data: function () {
             return {
                 message: 'Hello, everyone.'
@@ -27,7 +28,10 @@
                 'sendMessage'
             ]),
             send() {
-                this.sendMessage(this.message);
+                this.sendMessage({
+                    user: this.user,
+                    message: this.message
+                });
 
                 this.message = '';
             }
@@ -35,7 +39,7 @@
     }
 </script>
 
-<style scoped>
+<style>
     .margin-bottom {
         margin-bottom: 0.25em;
     }
