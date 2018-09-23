@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
+use App\Service\Pusher\PusherMemberEventFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +38,6 @@ class ChatController extends Controller
 
     /**
      * @param Request $request
-     * @param Dispatcher $dispatcher
      * @param Guard $guard
      *
      * @return array
@@ -57,5 +57,26 @@ class ChatController extends Controller
         broadcast($messageSentEvent)->toOthers();
 
         return ['status' => 'Message Sent!'];
+    }
+
+    /**
+     * @param Request $request
+     * @param PusherMemberEventFactory $pusherMemberEventFactory
+     */
+    public function webhook(Request $request, PusherMemberEventFactory $pusherMemberEventFactory)
+    {
+        $events = $request->get('events');
+
+        foreach ($events as $event) {
+            $userId = $event['user_id'];
+            $eventName = $event['name'];
+
+            /** @var User $user */
+            $user = User::find($userId);
+
+            $event = $pusherMemberEventFactory->create($eventName, $user);
+
+            broadcast($event);
+        }
     }
 }

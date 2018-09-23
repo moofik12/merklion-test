@@ -2,7 +2,6 @@
 
 namespace App\Events;
 
-use App\Message;
 use App\User;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -10,7 +9,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class MessageSent implements ShouldBroadcast
+class MemberAdded implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,19 +19,12 @@ class MessageSent implements ShouldBroadcast
     private $user;
 
     /**
-     * @var Message
-     */
-    private $message;
-
-    /**
-     * MessageSent constructor.
+     * MemberAdded constructor.
      * @param User $user
-     * @param Message $message
      */
-    public function __construct(User $user, Message $message)
+    public function __construct(User $user)
     {
         $this->user = $user;
-        $this->message = $message;
     }
 
     /**
@@ -52,7 +44,7 @@ class MessageSent implements ShouldBroadcast
     {
         return [
             'user' => $this->user,
-            'message' => $this->message
+            'message' => 'User entered'
         ];
     }
 }
