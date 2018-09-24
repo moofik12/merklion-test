@@ -37658,7 +37658,7 @@ var render = function() {
             { attrs: { type: "is-warning" } },
             [
               _c("b-input", {
-                attrs: { type: "text", maxlength: "30" },
+                attrs: { type: "text", maxlength: "255" },
                 model: {
                   value: _vm.message,
                   callback: function($$v) {
