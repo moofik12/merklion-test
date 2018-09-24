@@ -23,6 +23,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         'App\Events\UserLeft' => [
             'App\Listeners\MarkUserAsOffline'
+        ],
+        'App\Events\AvatarChanged' => [
+            'App\Listeners\UserAvatarChanged'
         ]
     ];
 

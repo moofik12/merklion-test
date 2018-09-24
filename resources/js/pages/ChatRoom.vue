@@ -10,9 +10,9 @@
 
         <div class="hero-body">
             <div class="container">
-                <div class="columns">
+                <div class="columns compensating-columns">
                     <message-window></message-window>
-                    <users-list></users-list>
+                    <users-window :user="user"></users-window>
                 </div>
             </div>
         </div>
@@ -26,7 +26,7 @@
 <script>
     import MessageWindow from '../components/MessageWindow';
     import ChatInput from '../components/ChatInput';
-    import UsersList from '../components/UsersList';
+    import UsersWindow from '../components/UsersWindow';
     import {mapActions} from 'vuex';
 
     export default {
@@ -40,7 +40,7 @@
         },
         components: {
             'message-window': MessageWindow,
-            'users-list': UsersList,
+            'users-window': UsersWindow,
             'chat-input': ChatInput
         },
         created: function () {
@@ -52,6 +52,12 @@
             channel() {
                 return window.Echo.join('chat.members');
             }
-        }
+        },
     }
 </script>
+
+<style>
+    .compensating-columns.columns:last-child {
+        margin-bottom: 0;
+    }
+</style>

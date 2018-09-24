@@ -18,4 +18,5 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('messages', 'ChatController@getMessages');
     Route::post('messages', 'ChatController@sendMessage');
     Route::get('users', 'ChatController@getUsers');
+    Route::post('upload', 'ChatController@uploadAvatar');
 });

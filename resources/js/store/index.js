@@ -7,7 +7,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         messages: [],
-        users: []
+        users: [],
+        isAvatarModalActive: false
     },
     mutations: {
         saveUsers(state, data) {
@@ -71,6 +72,9 @@ export default new Vuex.Store({
                 })
                 .listen('UserLeft', (e) => {
                     dispatch('getUsers');
+                })
+                .listen('AvatarChanged', (e) => {
+                    dispatch('getUsers');
                 });
         },
         sendMessage({commit}, message) {
@@ -82,9 +86,21 @@ export default new Vuex.Store({
                 headers: {
                     "X-Socket-ID": socketId
                 }
-            }).then(response => {
-                console.log(response.data);
-            });
+            })
+                .then(response => {
+                    console.log(response.data);
+                });
+        },
+        uploadAvatar({dispatch, commit}, file) {
+            return axios.post('/upload', {
+                image: file
+            })
+                .then(response => {
+                    console.log(response);
+                })
+                .then(() => {
+                    dispatch('getUsers');
+                });
         }
     }
 });

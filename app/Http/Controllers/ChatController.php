@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AvatarChanged;
 use App\Events\MessageSent;
 use App\Service\User\UserChatEventFactory;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Message;
 use App\User;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Collection;
+use Intervention\Image\Facades\Image;
 
 class ChatController extends Controller
 {
@@ -21,6 +24,9 @@ class ChatController extends Controller
         return view('chat');
     }
 
+    /**
+     * @return Collection
+     */
     public function getUsers()
     {
         return User::where('is_online', true)->get();
@@ -64,6 +70,32 @@ class ChatController extends Controller
 
     /**
      * @param Request $request
+     * @param Guard $guard
+     *
+     * @return JsonResponse
+     */
+    public function uploadAvatar(Request $request, Guard $guard)
+    {
+        /** @var User $user */
+        $user = $guard->user();
+        $imageData = $request->get('image');
+
+        $mimeType = explode(':', substr($imageData, 0, strpos($imageData, ';')))[1];
+        $dataType =  explode('/', $mimeType)[1];
+        $fileName = Carbon::now()->timestamp . '_' . uniqid() . '.' . $dataType;
+
+        $relativePathToImage = 'images/' . $fileName;
+        $absolutePathToImage = public_path('images/') . $fileName;
+        Image::make($request->get('image'))->save($absolutePathToImage);
+
+        $avatarChangedEvent = new AvatarChanged($user, $relativePathToImage);
+        broadcast($avatarChangedEvent);
+
+        return response()->json(['error' => false]);
+    }
+
+    /**
+     * @param Request $request
      * @param UserChatEventFactory $userChatEventFactory
      */
     public function webhook(Request $request, UserChatEventFactory $userChatEventFactory)
@@ -78,7 +110,7 @@ class ChatController extends Controller
             $user = User::find($userId);
             $event = $userChatEventFactory->create($eventName, $user);
 
-            broadcast($event);
+            broadcast($event)->toOthers();
         }
     }
 }
