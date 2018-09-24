@@ -1,65 +1,19 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+## Ссылка на чат
+http://merklion-test.herokuapp.com
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+## Как пользоваться чатом
+Страница чата доступна только для авторизованных пользователей. Для входа в чат используется стандартная аутентификация поставляемая в Laravel из коробки. Перед входом в чат необходимо зарегестрироваться (кнопка Register).
+Драйвер для отправки email не настроен, поэтому никаких подтверждающих писем на почту не придет. После регистрации пользователя редиректит в чат.
+<p>Чтобы отправить сообщение нужно нажать кнопку Send Message или нажать Enter.</p>
+<p><b>Для загрузки аватара нужно щелкнуть на круглешок напротив своего имени в списке пользователей чата, нажать кнопку "Click to upload", после выбора фотографии загрузка ее на сервер начнется автоматически. Как только фотография будет загружена, произойдет обновление списка пользователей. После этого в списке пользователей напротив своего имени будет видна загруженная фотография. Можно щелкнуть по круглешку чтобы просмотреть фото в полном размере.</b></p>
 
-## About Laravel
-
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
-
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Архитектура чата
+В приложении существуют две модели - пользователи и их сообщения (связь один ко многим).
+Все запросы к приложению обрабатывает контроллер ChatController.
+В качестве драйвера рассылки событий поддерживающего вебсокеты используется Pusher.
+Как только пользователь заходит в чат всем остальным пользователям рассылается событие, уведомляющее их о том что пользователь зашел в чат (это событие рассылается через Presence канал 'chat.members'). 
+Во время обработки этого события на бэкенде происходит установка у пользователя поля is_online в значение true. Этот флаг идентифицирует факт того, что пользователь находится в чате (т.е. будет отображаться в списке пользоватлей).
+Когда пользователь отправляет сообщение это событие содержащее внутри себя отправителя и само сообщение так же рассылается всем другим пользователям подписанным на приватный канал 'chat'.
+Когда пользователь покидает чат, то Pusher дергает сервер чата за специальный вебхук. В этом вебхуке инициализируется, обрабатывается (установка значения is_online в false, главная причина существования этого вебхука) и рассылается событие сигнализующее о том что пользователь покинул чат. Вебхук защищен c помощью Middleware которая проверяет на соотстветствие ключ пушера присланный нам в заголовке (таким образом никто крому пушера не сможет дергать этот вебхук т.к. не знает ключ).
+<p><b>Загрузка аватаров:</b> На фронте изображение кодируется в base64, после этого уходит пост-запросом на бэк. На бэке этот запрос валидуертся кастомным валидатором (описан в AppServiceProvider), который определяет mime-тип и тип полученного файла, и в случае если на сервер пришло не изображение, а какой то другой файл - сервер отдаст ошибку которая будет обработана фронтом. В случае если все ок - произойдет обработка и рассылка специального события - пользователю присвоится аватар (ссылка на файл в бд), а все другие пользователи будут уведомлены об этом событии и обновят информацию о пользователях в чате. Таким образом после загрузки аватара все другие пользователи в режиме реального времени увидят появление этого аватара напротив конкретного пользователя.</p>
+<p>На фронте приложение побито на соответствующие компоненты - общий компонент-страница ChatRoom и составные компоненты ChatInput, MessageWindow, UsersWindow</p>

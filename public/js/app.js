@@ -37659,6 +37659,17 @@ var render = function() {
             [
               _c("b-input", {
                 attrs: { type: "text", maxlength: "255" },
+                nativeOn: {
+                  keyup: function($event) {
+                    if (
+                      !("button" in $event) &&
+                      _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                    ) {
+                      return null
+                    }
+                    return _vm.send($event)
+                  }
+                },
                 model: {
                   value: _vm.message,
                   callback: function($$v) {

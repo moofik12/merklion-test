@@ -3,7 +3,7 @@
         <div class="columns compensating-columns margin-bottom">
             <div class="column is-10">
                 <b-field type="is-warning">
-                    <b-input v-model="message" type="text" maxlength="255"></b-input>
+                    <b-input @keyup.native.enter="send" v-model="message" type="text" maxlength="255"></b-input>
                 </b-field>
             </div>
             <div class="column is-2">
