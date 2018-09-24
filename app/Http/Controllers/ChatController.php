@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Events\AvatarChanged;
 use App\Events\MessageSent;
+use App\Events\UserJoined;
+use App\Events\UserLeft;
 use App\Http\Requests\UploadImageRequest;
-use App\Service\User\UserChatEventFactory;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
@@ -13,15 +14,23 @@ use Illuminate\Http\Request;
 use App\Message;
 use App\User;
 use Illuminate\Support\Collection;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
 
 class ChatController extends Controller
 {
     /**
-     * @return \Illuminate\View\View
+     * @param Guard $guard
+     *
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function chatIndex()
+    public function chatIndex(Guard $guard)
     {
+        /** @var User $user */
+        $user = $guard->user();
+        $event = new UserJoined($user);
+
+        broadcast($event)->toOthers();
+
         return view('chat');
     }
 
@@ -72,10 +81,11 @@ class ChatController extends Controller
     /**
      * @param UploadImageRequest $request
      * @param Guard $guard
+     * @param ImageManager $imageManager
      *
      * @return JsonResponse
      */
-    public function uploadAvatar(UploadImageRequest $request, Guard $guard)
+    public function uploadAvatar(UploadImageRequest $request, Guard $guard, ImageManager $imageManager)
     {
         /** @var User $user */
         $user = $guard->user();
@@ -87,7 +97,7 @@ class ChatController extends Controller
 
         $relativePathToImage = 'images/' . $fileName;
         $absolutePathToImage = public_path('images/') . $fileName;
-        Image::make($request->get('image'))->save($absolutePathToImage);
+        $imageManager->make($imageData)->save($absolutePathToImage);
 
         $avatarChangedEvent = new AvatarChanged($user, $relativePathToImage);
         broadcast($avatarChangedEvent);
@@ -97,9 +107,8 @@ class ChatController extends Controller
 
     /**
      * @param Request $request
-     * @param UserChatEventFactory $userChatEventFactory
      */
-    public function webhook(Request $request, UserChatEventFactory $userChatEventFactory)
+    public function webhook(Request $request)
     {
         $events = $request->get('events') ?? [];
 
@@ -107,9 +116,11 @@ class ChatController extends Controller
             $eventName = $event['name'];
             $userId = $event['user_id'];
 
-            /** @var User $user */
-            $user = User::find($userId);
-            $event = $userChatEventFactory->create($eventName, $user);
+            if ('member_removed' === $eventName) {
+                /** @var User $user */
+                $user = User::find($userId);
+                $event = new UserLeft($user);
+            }
 
             broadcast($event)->toOthers();
         }
