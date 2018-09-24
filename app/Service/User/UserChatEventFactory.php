@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Service\Pusher;
+namespace App\Service\User;
 
-use App\Events\MemberAdded;
-use App\Events\MemberRemoved;
+use App\Events\UserJoined;
+use App\Events\UserLeft;
 use App\User;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use InvalidArgumentException;
 
-class PusherMemberEventFactory
+class UserChatEventFactory
 {
     private const MEMBER_ADDED = 'member_added';
     private const MEMBER_REMOVED = 'member_removed';
@@ -17,17 +16,17 @@ class PusherMemberEventFactory
      * @param string $pusherEvent
      * @param User $user
      *
-     * @return ShouldBroadcast
+     * @return UserJoined|UserLeft
      */
     public function create(string $pusherEvent, User $user)
     {
         switch ($pusherEvent) {
             case self::MEMBER_ADDED:
-                return new MemberAdded($user);
+                return new UserJoined($user);
             case self::MEMBER_REMOVED:
-                return new MemberRemoved($user);
+                return new UserLeft($user);
             default:
-                throw new InvalidArgumentException('Invalid pusher event');
+                throw new InvalidArgumentException('Invalid chat event');
         }
     }
 }

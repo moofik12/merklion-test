@@ -3,15 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
-use App\Service\Pusher\PusherMemberEventFactory;
-use Illuminate\Database\Eloquent\Collection;
+use App\Service\User\UserChatEventFactory;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Events\Dispatcher;
 use App\Message;
 use App\User;
-use Pusher\PusherInstance;
+use Illuminate\Support\Facades\Log;
 
 class ChatController extends Controller
 {
@@ -21,6 +19,11 @@ class ChatController extends Controller
     public function chatIndex()
     {
         return view('chat');
+    }
+
+    public function getUsers()
+    {
+        return User::where('is_online', true)->get();
     }
 
     /**
@@ -61,20 +64,19 @@ class ChatController extends Controller
 
     /**
      * @param Request $request
-     * @param PusherMemberEventFactory $pusherMemberEventFactory
+     * @param UserChatEventFactory $userChatEventFactory
      */
-    public function webhook(Request $request, PusherMemberEventFactory $pusherMemberEventFactory)
+    public function webhook(Request $request, UserChatEventFactory $userChatEventFactory)
     {
-        $events = $request->get('events');
+        $events = $request->get('events') ?? [];
 
         foreach ($events as $event) {
-            $userId = $event['user_id'];
             $eventName = $event['name'];
+            $userId = $event['user_id'];
 
             /** @var User $user */
             $user = User::find($userId);
-
-            $event = $pusherMemberEventFactory->create($eventName, $user);
+            $event = $userChatEventFactory->create($eventName, $user);
 
             broadcast($event);
         }

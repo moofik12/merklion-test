@@ -34,7 +34,8 @@
         methods: {
             ...mapActions([
                 'getMessages',
-                'listenBroadcastChannel'
+                'listenBroadcastChannel',
+                'listenPresenceChannel'
             ])
         },
         components: {
@@ -45,6 +46,12 @@
         created: function () {
             this.getMessages();
             this.listenBroadcastChannel();
+            this.listenPresenceChannel(this.channel);
+        },
+        computed: {
+            channel() {
+                return window.Echo.join('chat.members');
+            }
         }
     }
 </script>

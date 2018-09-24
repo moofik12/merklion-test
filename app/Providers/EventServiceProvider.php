@@ -18,6 +18,12 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        'App\Events\UserJoined' => [
+            'App\Listeners\MarkUserAsOnline'
+        ],
+        'App\Events\UserLeft' => [
+            'App\Listeners\MarkUserAsOffline'
+        ]
     ];
 
     /**

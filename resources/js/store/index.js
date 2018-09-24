@@ -10,6 +10,9 @@ export default new Vuex.Store({
         users: []
     },
     mutations: {
+        saveUsers(state, data) {
+            state.users = data;
+        },
         saveManyMessages(state, data) {
             state.messages = data;
         },
@@ -18,6 +21,11 @@ export default new Vuex.Store({
         }
     },
     actions: {
+        getUsers({commit}) {
+            axios.get('/users').then(response => {
+                commit('saveUsers', response.data);
+            });
+        },
         getMessages({commit}) {
             axios.get('/messages').then(response => {
                 commit('saveManyMessages', response.data);
@@ -32,6 +40,37 @@ export default new Vuex.Store({
                     };
 
                     commit('saveOneMessage', message);
+                });
+        },
+        listenPresenceChannel({dispatch, commit}, channel) {
+            channel
+                .joining(data => {
+                    let notification = data.user.name + ' joined chat.';
+                    let message = {
+                        message: notification,
+                        user: {
+                            name: 'Notification bot'
+                        }
+                    };
+
+                    commit('saveOneMessage', message);
+                })
+                .leaving(data => {
+                    let notification = data.user.name + ' left chat.';
+                    let message = {
+                        message: notification,
+                        user: {
+                            name: 'Notification bot'
+                        }
+                    };
+
+                    commit('saveOneMessage', message);
+                })
+                .listen('UserJoined', (e) => {
+                    dispatch('getUsers');
+                })
+                .listen('UserLeft', (e) => {
+                    dispatch('getUsers');
                 });
         },
         sendMessage({commit}, message) {

@@ -18,7 +18,7 @@ class PusherWebhook
      */
     public function handle(Request $request, Closure $next)
     {
-        $secret = config('pusher.secret');
+        $secret = env('PUSHER_APP_SECRET');
         $signature = $request->header('X_PUSHER_SIGNATURE');
         $signatureChecker = new SignatureChecker($secret, $signature, $request->all());
 

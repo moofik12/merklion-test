@@ -3,13 +3,13 @@
 namespace App\Events;
 
 use App\User;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class MemberRemoved implements ShouldBroadcast
+class UserJoined implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,7 +19,7 @@ class MemberRemoved implements ShouldBroadcast
     private $user;
 
     /**
-     * MemberAdded constructor.
+     * UserJoined constructor.
      * @param User $user
      */
     public function __construct(User $user)
@@ -28,23 +28,18 @@ class MemberRemoved implements ShouldBroadcast
     }
 
     /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return \Illuminate\Broadcasting\Channel|array
+     * @return User
      */
-    public function broadcastOn()
+    public function getUser()
     {
-        return new PrivateChannel('chat');
+       return $this->user;
     }
 
     /**
-     * @return array
+     * @return PresenceChannel
      */
-    public function broadcastWith()
+    public function broadcastOn()
     {
-        return [
-            'user' => $this->user,
-            'message' => 'User has left'
-        ];
+        return new PresenceChannel('chat.members');
     }
 }
