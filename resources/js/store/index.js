@@ -8,7 +8,9 @@ export default new Vuex.Store({
     state: {
         messages: [],
         users: [],
-        isAvatarModalActive: false
+        isAvatarModalActive: false,
+        uploadStatus: true,
+        systemMessage: ''
     },
     mutations: {
         saveUsers(state, data) {
@@ -17,8 +19,15 @@ export default new Vuex.Store({
         saveManyMessages(state, data) {
             state.messages = data;
         },
-        saveOneMessage(state, message) {
-            state.messages.push(message);
+        saveOneMessage(state, data) {
+            state.messages.push(data);
+        },
+        changeUploadStatus(state, payload) {
+            state.uploadStatus = payload.uploadStatus;
+            state.systemMessage = payload.systemMessage;
+        },
+        pushCurrentUser(state, data) {
+            state.users.push(data);
         }
     },
     actions: {
@@ -93,14 +102,18 @@ export default new Vuex.Store({
         },
         uploadAvatar({dispatch, commit}, file) {
             return axios.post('/upload', {
-                image: file
+                image: file,
             })
-                .then(response => {
-                    console.log(response);
+                .catch((e) => {
+                    commit('changeUploadStatus', {
+                        uploadStatus: false,
+                        systemMessage: e.response.data.message
+                    });
                 })
                 .then(() => {
                     dispatch('getUsers');
                 });
+
         }
     }
 });

@@ -40,11 +40,11 @@
 </template>
 
 <script>
-    import {mapState, mapActions} from 'vuex';
+    import {mapState, mapActions, mapMutations} from 'vuex';
 
     export default {
         props: ['user'],
-        data: function() {
+        data: function () {
             return {
                 files: [],
                 image: '',
@@ -57,6 +57,10 @@
                 'getUsers',
                 'uploadAvatar',
                 'currentAvatar'
+            ]),
+            ...mapMutations([
+                'changeUploadStatus',
+                'pushCurrentUser'
             ]),
             changeAvatar(user) {
                 this.canUploadAvatar = false;
@@ -80,11 +84,13 @@
                 };
 
                 reader.readAsDataURL(file);
-            }
+            },
         },
         computed: {
             ...mapState({
-                users: store => store.users
+                users: store => store.users,
+                uploadStatus: store => store.uploadStatus,
+                systemMessage: store => store.systemMessage
             })
         },
         watch: {
@@ -94,9 +100,25 @@
                 }
 
                 this.createImage(this.files[0]);
+            },
+            uploadStatus: function () {
+                if (!this.uploadStatus) {
+                    this.$toast.open({
+                        duration: 5000,
+                        message: this.systemMessage,
+                        position: 'is-top',
+                        type: 'is-warning'
+                    });
+
+                    this.changeUploadStatus({
+                        uploadStatus: true,
+                        systemMessage: ''
+                    });
+                }
             }
         },
-        created: function() {
+        created: function () {
+            this.pushCurrentUser(this.user);
             this.getUsers();
         }
     }
@@ -123,6 +145,7 @@
         border-radius: 50%;
         display: inline-block;
         cursor: pointer;
+        position: relative;
     }
 
     .avatar-thumb + b {
@@ -131,6 +154,12 @@
     }
 
     .avatar-thumb img {
+        object-fit: cover;
         width: 50px;
+        height: 50px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
 </style>

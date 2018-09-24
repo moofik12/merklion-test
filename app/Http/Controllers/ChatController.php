@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\AvatarChanged;
 use App\Events\MessageSent;
+use App\Http\Requests\UploadImageRequest;
 use App\Service\User\UserChatEventFactory;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Guard;
@@ -69,12 +70,12 @@ class ChatController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param UploadImageRequest $request
      * @param Guard $guard
      *
      * @return JsonResponse
      */
-    public function uploadAvatar(Request $request, Guard $guard)
+    public function uploadAvatar(UploadImageRequest $request, Guard $guard)
     {
         /** @var User $user */
         $user = $guard->user();
